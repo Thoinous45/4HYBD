@@ -2,16 +2,18 @@ import http from "http";
 import express from "express";
 import logger from "morgan";
 import cors from "cors";
+
 // routes
-import indexRouter from "./routes/index.js";
-import userRouter from "./routes/user.js";
-import chatRoomRouter from "./routes/chatRoom.js";
-import deleteRouter from "./routes/delete.js";
+import indexRouter from "../routes/index.js";
+import userRouter from "../routes/user.js";
+import chatRoomRouter from "../routes/chatroom.js";
+import deleteRouter from "../routes/delete.js";
+
 // middlewares
-import { decode } from './middlewares/jwt.js'
+import { decode } from '../middlewares/jwt.js'
 
 // mongo connection
-import "./mongo.js";
+import "./mongodb.js";
 
 const app = express();
 

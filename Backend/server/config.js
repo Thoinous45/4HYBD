@@ -1,6 +1,6 @@
 const config = {
     db: {
-      url: 'localhost:27017',
+      url: 'localhost:3000',
       name: 'chatdb'
     }
   }
