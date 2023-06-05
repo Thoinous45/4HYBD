@@ -10,6 +10,9 @@ import deleteRouter from "./routes/delete.js";
 // middlewares
 import { decode } from './middlewares/jwt.js'
 
+// mongo connection
+import "./mongo.js";
+
 const app = express();
 
 /** Get port from environment and store in Express. */
