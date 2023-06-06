@@ -1,13 +1,29 @@
-import express from 'express';
-// controllers
-import user from '../controllers/user.js';
-
+const express = require("express");
 const router = express.Router();
+const bouncer = require("express-bouncer")(120000, 1.8e6, 5);
 
-router
-  .get('/', user.onGetAllUsers)
-  .post('/', user.onCreateUser)
-  .get('/:id', user.onGetUserById)
-  .delete('/:id', user.onDeleteUserById)
+bouncer.blocked = function (req, res, next, remaining) {
+  res.send(
+    429,
+    "Too many requests have been made, " +
+      "please wait " +
+      remaining / 1000 +
+      " seconds"
+  );
+};
 
-export default router;
+const userCtrl = require("../controllers/user");
+const joi = require("../middlewares/joi");
+const regex = require("../middlewares/regex");
+const auth=require("../middlewares/auth")
+
+//user route
+
+router.post("/signup",joi.userRegister,regex.authValidation, userCtrl.createUser);
+//bouncer protect from brutforce
+router.post("/login",bouncer.block,joi.userLogin, userCtrl.login);
+router.put("/modify/:id",auth,userCtrl.modifyUser)
+
+
+
+module.exports = router;
