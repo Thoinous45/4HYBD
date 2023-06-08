@@ -1,24 +1,24 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import ExploreContainer from '../../components/ExploreContainer';
+import ExploreContainer from '../components/ExploreContainer';
 
-const Amis: React.FC = () => {
+const Reglages: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Amis</IonTitle>
+          <IonTitle>Réglages</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
         <IonHeader collapse="condense">
           <IonToolbar>
-            <IonTitle size="large">Amis</IonTitle>
+            <IonTitle size="large">Réglages</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <ExploreContainer name="Amis" />
+        <ExploreContainer name="Réglages" />
       </IonContent>
     </IonPage>
   );
 };
 
-export default Amis;
+export default Reglages;
