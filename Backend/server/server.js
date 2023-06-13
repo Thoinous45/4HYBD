@@ -1,5 +1,9 @@
+const socketIo = require("socket.io");
+const webSocket = require("../utils/webSocket");
 const http = require("http");
 const app = require("./app.js");
+
+
 
 const normalizePort = (val) => {
   const port = parseInt(val, 10);
@@ -37,6 +41,8 @@ const errorHandler = (error) => {
 };
 
 const server = http.createServer(app);
+global.io = socketIo(server);
+global.io.on("connection", webSocket.connection);
 
 server.on("error", errorHandler);
 server.on("listening", () => {

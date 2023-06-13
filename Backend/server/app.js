@@ -2,11 +2,11 @@ const express = require("express");
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const userRoutes = require("../routes/user");
+const friendRoutes = require("../routes/friend");
 
 require("dotenv").config();
 const mongoose = require("mongoose");
 
-console.log(process.env.DB_ACCESS)
 mongoose
   .connect(process.env.DB_ACCESS, {
     useNewUrlParser: true,
@@ -35,5 +35,6 @@ app.use(bodyParser.json({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/api/users", userRoutes);
+app.use("/api/friends", friendRoutes);
 
 module.exports = app;

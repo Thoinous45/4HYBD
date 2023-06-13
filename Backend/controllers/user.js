@@ -40,8 +40,7 @@ exports.login = (req, res, next) => {
             userId: user._id,
             token: jwt.sign(
               {
-                userRight: user.right,
-                userEmail: user.email,
+                userId: user._id,
               },
               process.env.TOKEN_KEY,
               {
@@ -68,226 +67,70 @@ exports.login = (req, res, next) => {
 exports.modifyUser = (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
   const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
+  const userId = decodedToken.userId;
 
   if (decodedToken) {
-      bcrypt
-        .hash(req.body.password, 10)
-        .then((hash) => {
-          const user = new Admin({
-            firstname: req.body.firstname,
-            lastname: req.body.lastname,
-            email: req.body.email,
-            password: hash,
-          });
+    bcrypt
+      .hash(req.body.password, 10)
+      .then((hash) => {
+        if(req.body.password === req.body.password_confirmation) {
+          
+        const user = {
+          firstname: req.body.firstname,
+          lastname: req.body.lastname,
+          email: req.body.email,
+          password: hash,
+        };
 
-          user
-            .updateOne({ _id: req.params.id }, user)
-            .then(() => res.status(201).json({ message: "Utilisateur modifié !" }))
-            .catch((err) => res.status(401).json({ err }));
-        })
-        .catch((error) =>
-          res
-            .status(500)
-            .json({ error, message: "erreur serveur ou donnée invalide" })
-        );
-    } else { 
-      res.status(402).json({message: "erreur token invalide"})
-  }
-}
-
-exports.getOneAdmin = (req, res, next) => {
-  const token = req.headers.authorization.split(" ")[1];
-  const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
-  const userPower = decodedToken.userRight;
-
-  if (decodedToken) {
-    if (userPower == "Admin") {
-      Admin.findOne({ _id: req.params.id })
-        .select("-password")
-        .then((admin) => {
-          res.status(200).json(admin);
-        })
-        .catch((err) =>
-          res
-            .status(401)
-            .json({ err, message: "erreur serveur ou identifiant invalide" })
-        );
-    } else {
-      res.status(402).json({
-        message: "vous n'avez pas les droits pour cette requête",
-      });
-    }
+          User
+          .updateOne({ _id: userId }, user)
+          .then(() =>
+            res.status(201).json({ message: "Utilisateur modifié !" ,user , userId})
+          )
+          .catch((err) => res.status(401).json({ err }));
+        } else {
+          return res.status(401).json({ error: "Les mots de passe ne correspondents pas !" });
+        }
+      })
+      .catch((error) =>
+        res
+          .status(500)
+          .json({ error, message: "erreur serveur ou donnée invalide" })
+      );
   } else {
-    res.status(401).json({
-      error:
-        "token invalide ou vous devez être login pour voir ces informations !",
-    });
-  }
-};
-
-exports.getOneOperator = (req, res, next) => {
-  const token = req.headers.authorization.split(" ")[1];
-  const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
-  const userPower = decodedToken.userRight;
-
-  if (decodedToken) {
-    if (userPower == "Admin") {
-      Operator.findOne({ _id: req.params.id })
-        .select("-password")
-        .then((operator) => {
-          res.status(200).json(operator);
-        })
-        .catch((err) =>
-          res
-            .status(401)
-            .json({ err, message: "erreur serveur ou identifiant invalide" })
-        );
-    } else {
-      res.status(402).json({
-        message: "vous n'avez pas les droits pour cette requête",
-      });
-    }
-  } else {
-    res.status(401).json({
-      error:
-        "token invalide ou vous devez être login pour voir ces informations !",
-    });
+    res.status(402).json({ message: "erreur token invalide" });
   }
 };
 
 exports.getOneUser = (req, res, next) => {
-  const token = req.headers.authorization.split(" ")[1];
-  const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
-  const userPower = decodedToken.userRight;
-
-  if (decodedToken) {
-    if (userPower == "Admin") {
-      User.findOne({ _id: req.params.id })
-        .select("-password")
-        .then((user) => {
-          res.status(200).json(user);
-        })
-        .catch((err) =>
-          res
-            .status(401)
-            .json({ err, message: "erreur serveur ou identifiant invalide" })
-        );
-    } else {
-      res.status(402).json({
-        message: "vous n'avez pas les droits pour cette requête",
-      });
-    }
-  } else {
-    res.status(401).json({
-      error:
-        "token invalide ou vous devez être login pour voir ces informations !",
-    });
-  }
-};
-
-exports.getAllAdmin = (req, res, next) => {
-  const token = req.headers.authorization.split(" ")[1];
-  const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
-  //vérif que l'utilisateur est log
-  const userPower = decodedToken.userRight;
-
-  if (decodedToken) {
-    if (userPower == "Admin") {
-      Admin.find()
-        .select("-password")
-        .then((admin) => {
-          res.status(200).json(admin);
-        })
-
-        .catch((err) => res.status(401).json({ err }));
-    } else {
-      res.status(401).json({
-        error:
-          "token invalide ou vous devez être login pour voir ces informations !",
-      });
-    }
-  } else {
-    res.status(401).json({
-      message: "vous n'avez pas les droits pour cette requête",
-    });
-  }
-};
-
-exports.getAllOperator = (req, res, next) => {
-  const token = req.headers.authorization.split(" ")[1];
-  const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
-  //vérif que l'utilisateur est log
-  const userPower = decodedToken.userRight;
-
-  if (decodedToken) {
-    if (userPower == "Admin") {
-      Operator.find()
-        .select("-password")
-
-        .then((user) => {
-          res.status(200).json(user);
-        })
-
-        .catch((err) => res.status(401).json({ err }));
-    } else {
-      res.status(401).json({
-        error:
-          "token invalide ou vous devez être login pour voir ces informations !",
-      });
-    }
-  } else {
-    res.status(401).json({
-      message: "vous n'avez pas les droits pour cette requête",
-    });
-  }
+  User.findOne({ _id: req.params.id })
+    .select("-password -friends")
+    .then((user) => {
+      res.status(200).json(user);
+    })
+    .catch((err) =>
+      res
+        .status(401)
+        .json({ err, message: "erreur serveur ou identifiant invalide" })
+    );
 };
 
 exports.getAllUser = (req, res, next) => {
-  const token = req.headers.authorization.split(" ")[1];
-  const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
-  //vérif que l'utilisateur est log
-  const userPower = decodedToken.userRight;
-
-  if (decodedToken) {
-    if (userPower == "Admin") {
-      User.find()
-        .select("-password")
-        .then((user) => {
-          res.status(200).json(user);
-        })
-
-        .catch((err) => res.status(401).json({ err }));
-    } else {
-      res.status(401).json({
-        error:
-          "token invalide ou vous devez être login pour voir ces informations !",
-      });
-    }
-  } else {
-    res.status(401).json({
-      message: "vous n'avez pas les droits pour cette requête",
-    });
-  }
+  User.find()
+    .select("-password -friends")
+    .then((user) => {
+      res.status(200).json(user);
+    })
+    .catch((err) => res.status(401).json({ err }));
 };
 
-
-exports.deleteOperator = (req, res, next) => {
+exports.deleteUser = (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
   const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
-  const userId = decodedToken.userId;
 
-  Operator.findOne({ _id: req.params.id })
-    .then((user) => {
-      if (user._id == userId) {
-        user
-          .deleteOne({ _id: req.params.id })
-          .then(() => res.status(200).json({ message: "utilisateur supprimé" }))
-          .catch((error) => res.status(400).json({ error }));
-      } else {
-        res.status(401).json({
-          message: "Vous ne disposez pas des droits pour supprimer cet user !",
-        });
-      }
-    })
-    .catch((error) => res.status(500).json({ error }));
+  if (decodedToken) {
+    User.deleteOne({ _id: req.params.id })
+      .then(() => res.status(200).json({ message: "Utilisateur supprimé !" }))
+      .catch((err) => res.status(401).json({ err }));
+  }
 };

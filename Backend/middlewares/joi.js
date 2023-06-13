@@ -13,12 +13,14 @@ const complexityOptions = {
 
 
 const shemaRegister = Joi.object().keys({
+  firstname: Joi.string().required(),
+  lastname: Joi.string().required(),
   email: Joi.string().email().required(),
   password: passwordComplexity(complexityOptions),
   password_confirmation: Joi.any().equal(Joi.ref('password'))
-    .required()
     .label('Confirm password')
     .messages({ 'any.only': '{{#label}} does not match' })
+    .when('password', { is: Joi.exist(), then: Joi.required() })
 })
 
 
@@ -29,6 +31,8 @@ const shemaLogin = Joi.object().keys({
 
 
 const shemaModifyUser =Joi.object().keys({
+  firstname: Joi.string(),
+  lastname: Joi.string(),
   password: passwordComplexity(complexityOptions),
   password_confirmation: Joi.any().equal(Joi.ref('password'))
     .required()
