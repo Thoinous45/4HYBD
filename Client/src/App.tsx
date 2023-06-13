@@ -1,19 +1,10 @@
-import {Redirect, Route} from 'react-router-dom';
+import {Route} from 'react-router-dom';
 import {
     IonApp,
-    IonIcon,
-    IonLabel,
     IonRouterOutlet,
-    IonTabBar,
-    IonTabButton,
-    IonTabs,
     setupIonicReact
 } from '@ionic/react';
 import {IonReactRouter} from '@ionic/react-router';
-import {chatbubblesOutline, cogOutline, ellipse, peopleOutline} from 'ionicons/icons';
-import Discussions from './pages/Discussions';
-import Amis from './pages/Amis';
-import Reglages from './pages/Reglages';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';

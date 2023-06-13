@@ -2,7 +2,6 @@ import {IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs} fr
 import React from "react";
 import {chatbubblesOutline, cogOutline, peopleOutline} from "ionicons/icons";
 import {Redirect, Route} from "react-router-dom";
-import Login from "./Login";
 import Messages from "./Messages";
 import Amis from "./Amis";
 import Discussions from "./Discussions";
