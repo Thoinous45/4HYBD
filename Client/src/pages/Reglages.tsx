@@ -1,5 +1,5 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import ExploreContainer from '../components/ExploreContainer';
+import React from "react";
 
 const Reglages: React.FC = () => {
   return (
@@ -15,7 +15,6 @@ const Reglages: React.FC = () => {
             <IonTitle size="large">Réglages</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <ExploreContainer name="Réglages" />
       </IonContent>
     </IonPage>
   );

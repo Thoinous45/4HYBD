@@ -1,13 +1,22 @@
 import React from "react";
-import {IonPage} from "@ionic/react";
+import {IonBackButton, IonButtons, IonContent, IonHeader, IonPage, IonTitle, IonToolbar} from "@ionic/react";
 
 const Messages: React.FC = () => {
-    return(
-        <IonPage>
-            <div>
-                Messages
-            </div>
-        </IonPage>
+    return (
+        <>
+            <IonHeader>
+                <IonToolbar>
+                    <IonButtons slot="start">
+                        <IonBackButton></IonBackButton>
+                    </IonButtons>
+                    <IonTitle>Back Button</IonTitle>
+                </IonToolbar>
+            </IonHeader>
+            <IonContent>
+                Salut
+            </IonContent>
+        </>
+
     )
 }
 

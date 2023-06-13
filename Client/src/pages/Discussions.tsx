@@ -1,27 +1,19 @@
-<<<<<<< Updated upstream:Client/src/pages/Discussions.tsx
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import ExploreContainer from '../components/ExploreContainer';
-=======
 import {
     IonButton,
     IonButtons,
-    IonCard,
-    IonCardContent,
-    IonCardHeader, IonCardSubtitle, IonCardTitle,
     IonContent,
-    IonHeader, IonIcon, IonItem, IonLabel,
-    IonPage,
+    IonHeader, IonIcon, IonNav,
     IonTitle,
     IonToolbar
 } from '@ionic/react';
->>>>>>> Stashed changes:Client/src/pages/Discussions/Discussions.tsx
 import React from "react";
 import {create, createOutline, star} from "ionicons/icons";
-import Groupes from "../../components/Groupes";
+import Groupes from "../components/Groupes";
+import Messages from "./Messages";
 
 const Discussions: React.FC = () => {
     return (
-        <IonPage>
+        <>
             <IonHeader>
                 <IonToolbar className={"ion-padding-top"}>
                     <IonButtons slot="start">
@@ -42,11 +34,9 @@ const Discussions: React.FC = () => {
                         <IonTitle size="large">Discussions</IonTitle>
                     </IonToolbar>
                 </IonHeader>
-
                 <Groupes/>
-
             </IonContent>
-        </IonPage>
+        </>
     );
 };
 
