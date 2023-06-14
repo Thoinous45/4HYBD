@@ -104,7 +104,7 @@ exports.modifyUser = (req, res, next) => {
 
 exports.getOneUser = (req, res, next) => {
   User.findOne({ _id: req.params.id })
-    .select("-password -friends")
+    .select("-password -createdAt -updatedAt -__v ")
     .then((user) => {
       res.status(200).json(user);
     })
@@ -117,7 +117,7 @@ exports.getOneUser = (req, res, next) => {
 
 exports.getAllUser = (req, res, next) => {
   User.find()
-    .select("-password -friends")
+    .select("-password -createdAt -updatedAt -__v ")
     .then((user) => {
       res.status(200).json(user);
     })
@@ -127,9 +127,10 @@ exports.getAllUser = (req, res, next) => {
 exports.deleteUser = (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
   const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
+  const userId = decodedToken.userId;
 
   if (decodedToken) {
-    User.deleteOne({ _id: req.params.id })
+    User.deleteOne({ _id: userId })
       .then(() => res.status(200).json({ message: "Utilisateur supprimé !" }))
       .catch((err) => res.status(401).json({ err }));
   }

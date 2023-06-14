@@ -23,6 +23,7 @@ router.post("/signup",joi.userRegister,regex.authValidation, userCtrl.createUser
 //bouncer protect from brutforce
 router.post("/login",bouncer.block,joi.userLogin, userCtrl.login);
 router.put("/modify",auth,userCtrl.modifyUser)
+router.get("/all",userCtrl.getAllUser)
 
 
 
