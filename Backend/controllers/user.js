@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+const Friends = require("../models/friends");
 
 require("dotenv").config();
 
@@ -73,23 +74,25 @@ exports.modifyUser = (req, res, next) => {
     bcrypt
       .hash(req.body.password, 10)
       .then((hash) => {
-        if(req.body.password === req.body.password_confirmation) {
-          
-        const user = {
-          firstname: req.body.firstname,
-          lastname: req.body.lastname,
-          email: req.body.email,
-          password: hash,
-        };
+        if (req.body.password === req.body.password_confirmation) {
+          const user = {
+            firstname: req.body.firstname,
+            lastname: req.body.lastname,
+            email: req.body.email,
+            password: hash,
+          };
 
-          User
-          .updateOne({ _id: userId }, user)
-          .then(() =>
-            res.status(201).json({ message: "Utilisateur modifié !" ,user , userId})
-          )
-          .catch((err) => res.status(401).json({ err }));
+          User.updateOne({ _id: userId }, user)
+            .then(() =>
+              res
+                .status(201)
+                .json({ message: "Utilisateur modifié !", user, userId })
+            )
+            .catch((err) => res.status(401).json({ err }));
         } else {
-          return res.status(401).json({ error: "Les mots de passe ne correspondents pas !" });
+          return res
+            .status(401)
+            .json({ error: "Les mots de passe ne correspondents pas !" });
         }
       })
       .catch((error) =>
@@ -122,6 +125,32 @@ exports.getAllUser = (req, res, next) => {
       res.status(200).json(user);
     })
     .catch((err) => res.status(401).json({ err }));
+};
+
+exports.getStrangerOnly = (req, res, next) => {
+  const tokent = req.headers.authorization.split(" ")[1];
+  const decodedToken = jwt.verify(tokent, process.env.TOKEN_KEY);
+  const userId = decodedToken.userId;
+  let contact = [];
+
+  Friends.find({ $or: [{ recipient: userId }, { requester: userId }] })
+    .then((friends) => {
+      contact.push(userId);
+      for (let friend of friends) {
+        if(friend.recipient == userId){
+          contact.push(friend.requester);
+        }
+        else if(friend.requester == userId){
+          contact.push(friend.recipient);
+        }
+
+        User.find({ _id: { $nin: contact } })
+          .select("-password -createdAt -updatedAt -__v ")
+          .then((user) => {
+            res.status(200).json(user);
+          }).catch((err) => res.status(401).json({ err }));
+      }
+    }).catch((err) => res.status(401).json({ err }));
 };
 
 exports.deleteUser = (req, res, next) => {

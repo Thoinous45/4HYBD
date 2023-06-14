@@ -24,7 +24,8 @@ router.post("/signup",joi.userRegister,regex.authValidation, userCtrl.createUser
 router.post("/login",bouncer.block,joi.userLogin, userCtrl.login);
 router.put("/modify",auth,userCtrl.modifyUser)
 router.get("/all",userCtrl.getAllUser)
-
+router.get("/one/:id",userCtrl.getOneUser)
+router.get("/stranger",userCtrl.getStrangerOnly)
 
 
 module.exports = router;
