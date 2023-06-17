@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../models/user");
-const Friends = require("../models/friends");
+const User = require("../models/User");
+const Friends = require("../models/Friends");
 
 exports.addFriend = (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
@@ -16,7 +16,6 @@ exports.addFriend = (req, res, next) => {
           recipient: req.body.recipient,
         })
           .then((friendrequest2) => {
-            console.log(friendrequest, friendrequest2);
             if (friendrequest != null && friendrequest2 != null) {
               res.status(401).json({
                 message:
@@ -73,11 +72,11 @@ exports.acceptFriend = (req, res, next) => {
         } else {
           res.status(401).json({
             message:
-              "Vous n'avez pas reçu de demande d'ami de cet utilisateur !",
+              "Vous n'avez pas reçu de demande d'ami de cet utilisateur ou vous êtes déjà amis!",
           });
         }
       })
-      .catch((error) => res.status(500).json({ error }));
+      .catch((error) => res.status(500).json("une erreur est survenue ou la demande n'existe pas"));
   }
 };
 
@@ -126,7 +125,6 @@ exports.getFriends = (req, res, next) => {
       status: 2,
     })
       .then((friends) => {
-        console.log(friends);
         for (let friend of friends) {
           if (friend.requester == userId) {
             friendsInfo.push(friend.recipient);
@@ -134,12 +132,9 @@ exports.getFriends = (req, res, next) => {
             friendsInfo.push(friend.requester);
           }
         }
-
-        console.log(friendsInfo);
         User.find({ _id: { $in: friendsInfo } })
           .select("-password -createdAt -updatedAt -__v")
           .then((friends) => {
-            console.log(friends);
             res.status(200).json(friends);
           })
           .catch((error) => res.status(500).json({ error }));

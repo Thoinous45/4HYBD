@@ -3,6 +3,7 @@ const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const userRoutes = require("../routes/user");
 const friendRoutes = require("../routes/friend");
+const chatRoutes = require("../routes/chatroom");
 
 require("dotenv").config();
 const mongoose = require("mongoose");
@@ -36,5 +37,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/api/users", userRoutes);
 app.use("/api/friends", friendRoutes);
+app.use("/api/chatroom" , chatRoutes)
 
 module.exports = app;
