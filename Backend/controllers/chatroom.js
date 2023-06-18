@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const ChatRoom = require("../models/Chatroom");
-Friends = require("../models/Friends");
+const Friends = require("../models/Friends");
+const User = require("../models/User");
 
 exports.initiate = async (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
@@ -110,12 +111,70 @@ exports.getMessages = async (req, res, next) => {
     ChatRoom.findOne({ _id: req.params.id })
       .then((chatroom) => {
         if (chatroom.userIds.includes(userId)) {
-          res.status(200).json(chatroom.messages);
+          chatroom.readby.push(userId);
+          chatroom
+            .save()
+            .then(() => {
+              res.status(200).json(chatroom.messages);
+            })
+            .catch((error) =>
+              res
+                .status(500)
+                .json("une erreur est survenue ou la demande n'existe pas")
+            );
         } else {
           res
             .status(500)
             .json(
               "vous n'êtes pas autorisé à envoyer un message dans cette conversation"
+            );
+        }
+      })
+      .catch((error) =>
+        res
+          .status(500)
+          .json("une erreur est survenue ou la demande n'existe pas")
+      );
+  }
+};
+
+exports.addUserToConversation = async (req, res, next) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
+  const userId = decodedToken.userId;
+
+  if (decodedToken) {
+    ChatRoom.findOne({ _id: req.params.id })
+      .then((chatroom) => {
+        if (
+          chatroom.userIds.includes(userId) &&
+          chatroom.userIds.includes(req.body.userId) === false
+        ) {
+          User.findOne({ _id: req.body.userId })
+            .select("-password -__v -createdAt -updatedAt")
+            .then((user) => {
+              const newMessage = {
+                sender: "Chatbot",
+                message: "L'utilisateur " + user.username + " a été ajouté",
+              };
+              chatroom.messages.push(newMessage);
+              chatroom.userIds.push(req.body.userId);
+              chatroom
+                .save()
+                .then(() => {
+                  res.status(200).json("utilisateur ajouté");
+                })
+                .catch((error) =>
+                  res
+                    .status(500)
+                    .json("une erreur est survenue ou la demande n'existe pas")
+                );
+            });
+        } else {
+          res
+            .status(500)
+            .json(
+              "vous n'avez pas le droit d'ajouter des personnes à cette conversation ou l'utilisateur est déjà présent"
             );
         }
       })

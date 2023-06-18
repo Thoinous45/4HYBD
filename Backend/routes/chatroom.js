@@ -9,6 +9,7 @@ router
   //.get('/:roomId', chatRoom.getConversationByRoomId)
   .post('/create', chatRoom.initiate)
   .post('/sendMessage', chatRoom.postMessage)
+  .post('/addUser/:id', chatRoom.addUserToConversation)
   //.put('/:roomId/mark-read', chatRoom.markConversationReadByRoomId)
 
 module.exports = router;
