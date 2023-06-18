@@ -1,4 +1,5 @@
-
-.idea/workspace.xml
-
 Client/package-lock.json
+
+Client/node_modules
+
+.idea
