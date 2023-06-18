@@ -1,14 +1,15 @@
-import express from 'express';
-// controllers
-import chatRoom from '../controllers/chatRoom.js';
-
+const express = require("express");
 const router = express.Router();
+const chatRoom = require('../controllers/chatroom');
+
 
 router
-  .get('/', chatRoom.getRecentConversation)
-  .get('/:roomId', chatRoom.getConversationByRoomId)
-  .post('/initiate', chatRoom.initiate)
-  .post('/:roomId/message', chatRoom.postMessage)
-  .put('/:roomId/mark-read', chatRoom.markConversationReadByRoomId)
+  .get('/', chatRoom.myConversations)
+  .get('/:id', chatRoom.getMessages)
+  //.get('/:roomId', chatRoom.getConversationByRoomId)
+  .post('/create', chatRoom.initiate)
+  .post('/sendMessage', chatRoom.postMessage)
+  .post('/addUser/:id', chatRoom.addUserToConversation)
+  //.put('/:roomId/mark-read', chatRoom.markConversationReadByRoomId)
 
-export default router;
+module.exports = router;
