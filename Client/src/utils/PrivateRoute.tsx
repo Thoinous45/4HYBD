@@ -4,7 +4,6 @@ import {useState} from "react";
 
 const PrivateRoute = ({ component: Component, ...rest }: any) => {
     const [isAuthenticated] = useState(AuthService.isAuthenticated);
-    console.log(isAuthenticated)
     return (
         isAuthenticated ? <Component {...rest}/> : <Redirect to="/"/>
     )

@@ -1,21 +1,19 @@
 import React from "react";
 import {
-    IonButton, IonCheckbox,
+    IonButton,
     IonIcon,
     IonItem,
     IonItemOption,
     IonItemOptions,
     IonItemSliding,
     IonLabel,
-    IonList, IonNav, IonNavLink,
+    IonList,
+    IonNavLink, IonTabButton,
     IonText
 } from "@ionic/react";
-import {
-    addCircle, alertCircleOutline, checkmarkCircle,
-    ellipsisHorizontal, star,
-    trash
-} from "ionicons/icons";
+import {ellipsisHorizontal} from "ionicons/icons";
 import Messages from "../pages/Messages";
+import ActionSheetComponent from "./ActionSheetComponent";
 
 
 const AllContacts = [
@@ -46,17 +44,20 @@ const AllContacts = [
 ];
 
 const Groupes: React.FC = () => {
+
+    const [isOpen, setIsOpen] = React.useState(false);
+    const [title, setTitle] = React.useState("");
+    const [id, setId] = React.useState(0);
+
+
+
     return (
         <>
             <IonList>
                 {AllContacts.map((contact) => (
-                        <IonItem key={contact.id}>
-                            <IonItemSliding>
-                                <IonNavLink routerDirection={"forward"} component={() => <Messages/>}>
-
-
-                                <IonItem button>
-                                    <IonCheckbox></IonCheckbox>
+                    <IonItem key={contact.id} >
+                        <IonItemSliding>
+                                <IonItem button routerLink={"/messages/" + contact.id}>
                                     <IonLabel>
                                         <IonText color={"primary"}>
                                             {contact.name}
@@ -64,19 +65,20 @@ const Groupes: React.FC = () => {
                                         <p>{contact.lastMessage}</p>
                                     </IonLabel>
                                 </IonItem>
-                                <IonItemOptions side="end">
-                                    <IonItemOption color="medium">
-                                        <IonIcon slot="icon-only" icon={ellipsisHorizontal}>Options</IonIcon>
-                                    </IonItemOption>
-                                    <IonItemOption color="danger">
-                                        <IonIcon slot="icon-only" icon={trash}></IonIcon>
+                                <IonItemOptions side="end" onClick={() => {
+                                    setIsOpen(true)
+                                    setTitle(contact.name)
+                                    setId(contact.id)
+                                }}>
+                                    <IonItemOption color="medium" >
+                                            <IonIcon slot="icon-only" icon={ellipsisHorizontal}>Options</IonIcon>
                                     </IonItemOption>
                                 </IonItemOptions>
-                                </IonNavLink>
-                            </IonItemSliding>
-                        </IonItem>
+                        </IonItemSliding>
+                    </IonItem>
                 ))}
             </IonList>
+            <ActionSheetComponent isOpen={isOpen} onDidDismiss={() => setIsOpen(false)} title={title} id={id}/>
 
         </>
     )

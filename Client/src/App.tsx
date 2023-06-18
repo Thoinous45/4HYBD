@@ -1,9 +1,5 @@
 import {Route} from 'react-router-dom';
-import {
-    IonApp,
-    IonRouterOutlet,
-    setupIonicReact
-} from '@ionic/react';
+import {IonApp, IonRouterOutlet, setupIonicReact} from '@ionic/react';
 import {IonReactRouter} from '@ionic/react-router';
 
 /* Core CSS required for Ionic components to work properly */
@@ -28,16 +24,20 @@ import React from "react";
 import Login from "./pages/Login";
 import Tabs from "./pages/Tabs";
 import PrivateRoute from "./utils/PrivateRoute";
+import Informations from "./pages/Informations";
+import Messages from "./pages/Messages";
+
 
 setupIonicReact();
 
 const App: React.FC = () => (
     <IonApp>
         <IonReactRouter>
-                <IonRouterOutlet>
-                    <Route exact path="/" component={Login}/>
-                    <PrivateRoute path="/app" component={Tabs}/>
-                </IonRouterOutlet>
+            <IonRouterOutlet>
+                <Route exact path="/" component={Login}/>
+                <PrivateRoute exact path="/messages/:id" component={Messages}/>
+                <PrivateRoute path="/app" component={Tabs}/>
+            </IonRouterOutlet>
         </IonReactRouter>
     </IonApp>
 );
