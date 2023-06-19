@@ -107,7 +107,7 @@ exports.modifyUser = (req, res, next) => {
 
 exports.getOneUser = (req, res, next) => {
   User.findOne({ _id: req.params.id })
-    .select("-password -createdAt -updatedAt -__v ")
+    .select("-password -createdAt -updatedAt -__v -story")
     .then((user) => {
       res.status(200).json(user);
     })
@@ -120,7 +120,7 @@ exports.getOneUser = (req, res, next) => {
 
 exports.getAllUser = (req, res, next) => {
   User.find()
-    .select("-password -createdAt -updatedAt -__v ")
+    .select("-password -createdAt -updatedAt -__v -story")
     .then((user) => {
       res.status(200).json(user);
     })
@@ -137,20 +137,21 @@ exports.getStrangerOnly = (req, res, next) => {
     .then((friends) => {
       contact.push(userId);
       for (let friend of friends) {
-        if(friend.recipient == userId){
+        if (friend.recipient == userId) {
           contact.push(friend.requester);
-        }
-        else if(friend.requester == userId){
+        } else if (friend.requester == userId) {
           contact.push(friend.recipient);
         }
 
         User.find({ _id: { $nin: contact } })
-          .select("-password -createdAt -updatedAt -__v ")
+          .select("-password -createdAt -updatedAt -__v -story")
           .then((user) => {
             res.status(200).json(user);
-          }).catch((err) => res.status(401).json({ err }));
+          })
+          .catch((err) => res.status(401).json({ err }));
       }
-    }).catch((err) => res.status(401).json({ err }));
+    })
+    .catch((err) => res.status(401).json({ err }));
 };
 
 exports.deleteUser = (req, res, next) => {
@@ -164,3 +165,87 @@ exports.deleteUser = (req, res, next) => {
       .catch((err) => res.status(401).json({ err }));
   }
 };
+
+exports.postStory = (req, res, next) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
+  const userId = decodedToken.userId;
+
+  const fileName = req.file.filename;
+  const fileSize = req.file.size;
+  const fileType = req.file.mimetype;
+  const description = req.body.description;
+  const longitude = req.body.longitude;
+  const latitude = req.body.latitude;
+
+  User.findOne({ _id: userId })
+    .select("-password -createdAt -updatedAt -__v")
+    .then((user) => {
+      const location = {
+        longitude: longitude,
+        latitude: latitude,
+      };
+
+      const file = {
+        name: fileName,
+        description: description,
+        size: fileSize,
+        type: fileType,
+        location: location,
+      };
+
+      user.story = file;
+      user
+        .save()
+        .then(() => res.status(201).json(req.file))
+        .catch((error) => res.status(400).json({ error }));
+    })
+    .catch((err) => res.status(401).json({ err }));
+};
+
+exports.getStory = (req, res, next) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
+  const userId = decodedToken.userId;
+
+  if (decodedToken) {
+    Friends.find({ $or: [{ recipient: userId }, { requester: userId }] })
+      .then((friends) => {
+        if (friends) {
+          let friendsId = [];
+
+          if (friends.recipient == userId) {
+            friendsId.push(friends.requester);
+          } else if (friends.requester == userId) {
+            friendsId.push(friends.recipient);
+          }
+
+          console.log(friendsId)
+
+          User.find({ _id: { $in: friendsId } })
+            .select("-password -createdAt -updatedAt -__v")
+            .then((users) => {
+              res.status(200).json(users);
+            })
+            .catch((err) => res.status(401).json({ err }));
+
+        }
+      }).catch((err) => res.status(401).json({ err }));
+  } 
+  else {
+    res.status(402).json({ message: "erreur token invalide" });
+  }
+};
+
+
+exports.myStory = (req, res, next) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
+  const userId = decodedToken.userId;
+
+  if (decodedToken) {
+
+  }else {
+    res.status(402).json({ message: "erreur token invalide" });
+  }
+}

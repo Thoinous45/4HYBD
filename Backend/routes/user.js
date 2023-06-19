@@ -26,6 +26,8 @@ router.put("/modify",auth,userCtrl.modifyUser)
 router.get("/all",userCtrl.getAllUser)
 router.get("/one/:id",userCtrl.getOneUser)
 router.get("/stranger",userCtrl.getStrangerOnly)
+router.post("/postStory",userCtrl.postStory)
+router.get ("/getStory",userCtrl.getStory)
 
 
 module.exports = router;

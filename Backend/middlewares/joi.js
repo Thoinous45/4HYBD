@@ -8,7 +8,7 @@ const complexityOptions = {
     upperCase: 1,
     numeric: 1,
     symbol: 1,
-    requirementCount: 3,
+    requirementCount: 4,
   };
 
 
