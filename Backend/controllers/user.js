@@ -65,6 +65,25 @@ exports.login = (req, res, next) => {
     );
 };
 
+exports.isLogin = (req, res, next) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
+  const userId = decodedToken.userId;
+
+  if (decodedToken) {
+    User.find({ _id: userId }).then((user) => {
+      if (user === null) {
+        return res.status(401).json(false);
+      }
+      else{
+        res.status(200).json(true);
+      }
+    }).catch((error) => res.status(401).json({ error }));
+  } else {
+    res.status(402).json(false);
+  }
+};
+
 exports.modifyUser = (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
   const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
@@ -128,8 +147,8 @@ exports.getAllUser = (req, res, next) => {
 };
 
 exports.getStrangerOnly = (req, res, next) => {
-  const tokent = req.headers.authorization.split(" ")[1];
-  const decodedToken = jwt.verify(tokent, process.env.TOKEN_KEY);
+  const token = req.headers.authorization.split(" ")[1];
+  const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
   const userId = decodedToken.userId;
   let contact = [];
 
@@ -220,7 +239,7 @@ exports.getStory = (req, res, next) => {
             friendsId.push(friends.recipient);
           }
 
-          console.log(friendsId)
+          console.log(friendsId);
 
           User.find({ _id: { $in: friendsId } })
             .select("-password -createdAt -updatedAt -__v")
@@ -228,15 +247,13 @@ exports.getStory = (req, res, next) => {
               res.status(200).json(users);
             })
             .catch((err) => res.status(401).json({ err }));
-
         }
-      }).catch((err) => res.status(401).json({ err }));
-  } 
-  else {
+      })
+      .catch((err) => res.status(401).json({ err }));
+  } else {
     res.status(402).json({ message: "erreur token invalide" });
   }
 };
-
 
 exports.myStory = (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
@@ -244,8 +261,7 @@ exports.myStory = (req, res, next) => {
   const userId = decodedToken.userId;
 
   if (decodedToken) {
-
-  }else {
+  } else {
     res.status(402).json({ message: "erreur token invalide" });
   }
-}
+};
