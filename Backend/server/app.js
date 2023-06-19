@@ -37,6 +37,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/api/users", userRoutes);
 app.use("/api/friends", friendRoutes);
-app.use("/api/chatroom" , chatRoutes)
+app.use("/api/chatroom" , chatRoutes);
 
 module.exports = app;
