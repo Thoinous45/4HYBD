@@ -172,7 +172,6 @@ describe("Users", () => {
         firstname: "testeee",
         lastname: "testeee",
       };
-      console.log(user);
       chai
         .request(server)
         .post("/api/users/signup")
@@ -189,7 +188,7 @@ describe("Users", () => {
 
 
   //login
-  
+
   describe("/POST login", () => {
     it("it should GET login (userId + token)", (done) => {
       let user = {
