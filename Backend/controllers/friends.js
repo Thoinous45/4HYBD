@@ -8,42 +8,70 @@ exports.addFriend = async (req, res, next) => {
   const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
   const userId = decodedToken.userId;
 
-  if (decodedToken || userId !== req.body.recipient) {
-    await Friends.findOne({ $or: [{ requester: userId , recipient : req.body.userIds}, { requester: req.body.userIds , recipient:userId}] })
+  if (
+    decodedToken &&
+    userId !== req.body.recipient &&
+    req.body.recipient !== "undefined"
+  ) {
+    await Friends.findOne({
+      $or: [
+        { $and :[{requester: userId, recipient: req.body.recipient}]},
+        { $and :[{requester: req.body.recipient, recipient: userId}]},
+      ],
+    })
       .then((friend) => {
-        if (friend == null) {
-              const friends = new Friends({
-                requester: userId,
-                recipient: req.body.recipient,
-                status: 1,
-              });
-              friends
-                .save()
-                .then(() =>
-                  res.status(201).json({ message: "Demande d'ami envoyée !" })
-                )
-                .catch((error) =>
-                  res
-                    .status(500)
-                    .json({ error, message: "erreur serveur ou donnée invalide" })
-                );
-        } else {
-          res.status(401).json({
-            message:
-              "Vous êtes déjà amis ou vous avez déjà envoyé une demande d'ami à cet utilisateur!",
-          });
-        }
+        User.findOne({ _id: req.body.recipient })
+          .then((user) => {
+            if (user !== null) {
+              if (friend == null) {
+                const friends = new Friends({
+                  requester: userId,
+                  recipient: req.body.recipient,
+                  status: 1,
+                });
+                friends
+                  .save()
+                  .then(() =>
+                    res.status(201).json({ message: "Demande d'ami envoyée !" })
+                  )
+                  .catch((error) =>
+                    res.status(500).json({
+                      error,
+                      message: "erreur serveur ou donnée invalide",
+                    })
+                  );
+              } else {
+                res.status(401).json({
+                  message:
+                    "Vous êtes déjà amis ou vous avez déjà envoyé une demande d'ami à cet utilisateur!",
+                });
+              }
+            } else {
+              res
+                .status(401)
+                .json("l'utilisateur que vous cherchez n'existe pas");
+            }
+          })
+          .catch((error) =>
+            res
+              .status(500)
+              .json(
+                "L'utilisateur que vous cherche n'existe pas ou une erreur est survenue"
+              )
+          );
       })
-      .catch((error) => res.status(500).json("une erreur est survenue ou la demande n'existe pas"));
-  }else {
+      .catch((error) =>
+        res
+          .status(500)
+          .json("une erreur est survenue ou la demande n'existe pas")
+      );
+  } else {
     res.status(401).json({
       message:
         "Vous ne pouvez pas vous ajouter en ami ou une erreur de token est survenue!",
     });
   }
 };
-                
-
 
 exports.acceptFriend = (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
@@ -73,7 +101,11 @@ exports.acceptFriend = (req, res, next) => {
           });
         }
       })
-      .catch((error) => res.status(500).json("une erreur est survenue ou la demande n'existe pas"));
+      .catch((error) =>
+        res
+          .status(500)
+          .json("une erreur est survenue ou la demande n'existe pas")
+      );
   }
 };
 
@@ -173,14 +205,18 @@ exports.getSendRequests = async (req, res, next) => {
   }
 };
 
-
 exports.deleteFriend = async (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
   const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
   const userId = decodedToken.userId;
 
   if (decodedToken) {
-    Friends.findOne({ $or: [{ requester: userId , recipient : req.body.userIds}, { requester: req.body.userIds , recipient:userId}] })
+    Friends.findOne({
+      $or: [
+        { requester: userId, recipient: req.body.userIds },
+        { requester: req.body.userIds, recipient: userId },
+      ],
+    })
       .then((friend) => {
         if (friend) {
           Friends.deleteOne({ _id: friend._id })
@@ -192,8 +228,7 @@ exports.deleteFriend = async (req, res, next) => {
               "Vous n'êtes pas amis avec cet utilisateur ou une erreur de token est survenue!",
           });
         }
-      }
-      )
+      })
       .catch((error) => res.status(500).json({ error }));
   }
 };
