@@ -175,7 +175,6 @@ exports.getStrangerOnly = async (req, res, next) => {
         User.find({ _id: { $nin: contact } })
           .select("-password -createdAt -updatedAt -__v -story")
           .then((user) => {
-            console.log(user);
             res.status(200).json(user);
           })
           .catch((err) => res.status(401).json({ err }));
