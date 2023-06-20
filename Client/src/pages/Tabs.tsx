@@ -18,7 +18,6 @@ const Tabs: React.FC = () => {
                 <Route exact path="/app/discussions" component={Discussions}/>
                 <Route path="/app/reglages" component={Reglages}/>
                 <Route path="/app/informations" component={Informations}/>
-                <Route path="/messages/:id" component={Messages}/>
                 <Route path="/app/stories" component={Stories}/>
             </IonRouterOutlet>
             <IonTabBar slot="bottom">

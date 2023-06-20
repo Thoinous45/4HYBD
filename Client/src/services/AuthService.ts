@@ -69,6 +69,15 @@ const AuthService = {
             return response.data;
         });
     },
+    getOneUser() {
+        if (sessionStorage.getItem('user')) {
+            return axios.get(api + "one/" + sessionStorage.getItem('user'), {
+                headers: {'Authorization': `Bearer ${sessionStorage.getItem('token')}`}
+            }).then((response) => {
+                return response.data;
+            });
+        }
+    }
 }
 
 export default AuthService;

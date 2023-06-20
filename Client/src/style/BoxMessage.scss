@@ -1,0 +1,58 @@
+.user {
+    position: relative;
+    align-content: end;
+    right: 0;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.user > ion-label {
+    background: #2dd36f;
+    padding: 10px 30px 10px 10px;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.user > ion-text {
+    font-size: 10rem;
+}
+
+.dateUser {
+    padding-bottom: 10px;
+    position: absolute;
+    margin-right: 25px;
+    padding-right: 5px;
+    bottom: 0;
+    right: 0;
+    color: #ffffff;
+}
+
+.dateSender {
+    padding-bottom: 10px;
+    padding-left: 5px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    color: #ffffff;
+}
+
+.sender {
+    position: relative;
+    align-content: start;
+    left: 0;
+    width: fit-content;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.sender > ion-label {
+    background: #727a76;
+    padding: 10px 10px 10px 40px;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}

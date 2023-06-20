@@ -125,11 +125,11 @@ const Amis: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader mode="md">
+      <IonHeader className={"ion-padding-top"}>
         <IonToolbar>
           <IonTitle size="large">Amis</IonTitle>
         </IonToolbar>
-        <IonToolbar>
+        <IonToolbar mode={"md"}>
           <IonSegment
             value={activeTab}
             onIonChange={(e) => setActiveTab(e.detail.value)}

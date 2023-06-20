@@ -42,7 +42,7 @@ const MyMap: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader mode="md">
+      <IonHeader className={"ion-padding-top"}>
         <IonToolbar>
           <IonTitle size="large">Stories</IonTitle>
         </IonToolbar>

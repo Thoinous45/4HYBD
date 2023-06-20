@@ -23,8 +23,8 @@ const Discussions: React.FC = () => {
     }
 
     return (
-            <IonPage>
-            <IonHeader>
+        <IonPage>
+            <IonHeader mode="ios">
                 <IonToolbar className={"ion-padding-top"}>
                     <IonButtons slot="start">
                         <IonButton>
@@ -45,9 +45,7 @@ const Discussions: React.FC = () => {
                     </IonToolbar>
                 </IonHeader>
                 <Groupes/>
-
-                <ModalNewGroup isOpen={isModalOpen} closeModal={closeModal} />
-
+                <ModalNewGroup isOpen={isModalOpen} closeModal={closeModal}/>
             </IonContent>
         </IonPage>
     );

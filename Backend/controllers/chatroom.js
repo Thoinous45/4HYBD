@@ -312,7 +312,7 @@ exports.changeConversationName = async (req, res, next) => {
     ChatRoom.findOne({ _id: req.params.id })
       .then((chatroom) => {
         if (
-          chatroom.userIds.includes(userId) 
+          chatroom.userIds.includes(userId)
         ) {
           chatroom.conversationName = req.body.name;
           chatroom
@@ -329,7 +329,7 @@ exports.changeConversationName = async (req, res, next) => {
           res
             .status(500)
             .json("vous n'avez pas le droit de modifier cette conversation");
-        } 
+        }
       })
       .catch((error) =>
         res
