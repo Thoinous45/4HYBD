@@ -125,7 +125,10 @@ exports.getMessages = async (req, res, next) => {
     ChatRoom.findOne({ _id: req.params.id })
       .then((chatroom) => {
         if (chatroom.userIds.includes(userId)) {
-          chatroom.readby.push(userId);
+          if (chatroom.readby.includes(userId) === false)
+          {
+            chatroom.readby.push(userId);
+          }
           chatroom
             .save()
             .then(() => {
@@ -278,8 +281,7 @@ exports.deleteConversation = async (req, res, next) => {
           chatroom.userIds.includes(userId) &&
           chatroom.initiator === userId
         ) {
-          chatroom
-            .delete()
+          ChatRoom.deleteOne({ _id: req.body.roomId })
             .then(() => {
               res.status(200).json("conversation supprimée");
             })
