@@ -55,6 +55,12 @@ exports.myConversations = async (req, res, next) => {
     ChatRoom.find({ userIds: userId })
       .select("-userIds -initiator -__v -createdAt -updatedAt")
       .then((chatrooms) => {
+
+        //res le tableau de chatrooms avec seulement le dernier messages de chaque conversation
+        chatrooms.forEach((chatroom) => {
+          chatroom.messages = chatroom.messages[chatroom.messages.length - 1];
+        });
+
         res.status(200).json(chatrooms);
       })
       .catch((error) =>
@@ -119,7 +125,10 @@ exports.getMessages = async (req, res, next) => {
     ChatRoom.findOne({ _id: req.params.id })
       .then((chatroom) => {
         if (chatroom.userIds.includes(userId)) {
-          chatroom.readby.push(userId);
+          if (chatroom.readby.includes(userId) === false)
+          {
+            chatroom.readby.push(userId);
+          }
           chatroom
             .save()
             .then(() => {
@@ -269,11 +278,9 @@ exports.deleteConversation = async (req, res, next) => {
     ChatRoom.findOne({ _id: req.body.roomId })
       .then((chatroom) => {
         if (
-          chatroom.userIds.includes(userId) &&
-          chatroom.initiator === userId
+          chatroom.userIds.includes(userId)
         ) {
-          chatroom
-            .delete()
+          ChatRoom.deleteOne({ _id: req.body.roomId })
             .then(() => {
               res.status(200).json("conversation supprimée");
             })
@@ -307,7 +314,7 @@ exports.changeConversationName = async (req, res, next) => {
         if (
           chatroom.userIds.includes(userId) 
         ) {
-          chatroom.name = req.body.name;
+          chatroom.conversationName = req.body.name;
           chatroom
             .save()
             .then(() => {
