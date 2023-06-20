@@ -213,8 +213,8 @@ exports.deleteFriend = async (req, res, next) => {
   if (decodedToken) {
     Friends.findOne({
       $or: [
-        { requester: userId, recipient: req.body.userIds },
-        { requester: req.body.userIds, recipient: userId },
+        { requester: userId, recipient: req.body.friendId },
+        { requester: req.body.friendId, recipient: userId },
       ],
     })
       .then((friend) => {
