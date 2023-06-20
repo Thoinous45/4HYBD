@@ -278,8 +278,7 @@ exports.deleteConversation = async (req, res, next) => {
     ChatRoom.findOne({ _id: req.body.roomId })
       .then((chatroom) => {
         if (
-          chatroom.userIds.includes(userId) &&
-          chatroom.initiator === userId
+          chatroom.userIds.includes(userId)
         ) {
           ChatRoom.deleteOne({ _id: req.body.roomId })
             .then(() => {
