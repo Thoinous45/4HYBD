@@ -4,6 +4,8 @@ const uniqueValidator = require("mongoose-unique-validator");
 const MessageSchema = mongoose.Schema(
   {
     sender: { type: String, required: true },
+    firstname  : {type:String , required :true},
+    lastname : {type:String , required :true},
     message: { type: String, required: true },
   },
   { timestamps: true }

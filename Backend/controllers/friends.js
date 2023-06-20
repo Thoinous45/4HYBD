@@ -3,25 +3,15 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Friends = require("../models/Friends");
 
-exports.addFriend = (req, res, next) => {
+exports.addFriend = async (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
   const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
   const userId = decodedToken.userId;
 
-  if (decodedToken) {
-    Friends.findOne({ requester: req.body.recipient, recipient: userId })
-      .then((friendrequest) => {
-        Friends.findOne({
-          requester: userId,
-          recipient: req.body.recipient,
-        })
-          .then((friendrequest2) => {
-            if (friendrequest != null && friendrequest2 != null) {
-              res.status(401).json({
-                message:
-                  "Vous avez déjà envoyé une demande d'ami à cet utilisateur ou vous êtes déjà amis !",
-              });
-            } else {
+  if (decodedToken || userId !== req.body.recipient) {
+    await Friends.findOne({ $or: [{ requester: userId , recipient : req.body.userIds}, { requester: req.body.userIds , recipient:userId}] })
+      .then((friend) => {
+        if (friend !== null) {
               const friends = new Friends({
                 requester: userId,
                 recipient: req.body.recipient,
@@ -35,18 +25,26 @@ exports.addFriend = (req, res, next) => {
                 .catch((error) =>
                   res
                     .status(500)
-                    .json({
-                      error,
-                      message: "erreur serveur ou donnée invalide",
-                    })
+                    .json({ error, message: "erreur serveur ou donnée invalide" })
                 );
-            }
-          })
-          .catch((error) => res.status(500).json({ error }));
+        } else {
+          res.status(401).json({
+            message:
+              "Vous êtes déjà amis ou vous avez déjà envoyé une demande d'ami à cet utilisateur!",
+          });
+        }
       })
-      .catch((error) => res.status(500).json({ error }));
+      .catch((error) => res.status(500).json("une erreur est survenue ou la demande n'existe pas"));
+  }else {
+    res.status(401).json({
+      message:
+        "Vous ne pouvez pas vous ajouter en ami ou une erreur de token est survenue!",
+    });
   }
 };
+                
+
+               
 
 exports.acceptFriend = (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
@@ -172,6 +170,31 @@ exports.getSendRequests = async (req, res, next) => {
         }
         res.status(200).json(friendsInfo);
       })
+      .catch((error) => res.status(500).json({ error }));
+  }
+};
+
+
+exports.deleteFriend = async (req, res, next) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
+  const userId = decodedToken.userId;
+
+  if (decodedToken) {
+    Friends.findOne({ $or: [{ requester: userId , recipient : req.body.userIds}, { requester: req.body.userIds , recipient:userId}] })
+      .then((friend) => {
+        if (friend) {
+          Friends.deleteOne({ _id: friend._id })
+            .then(() => res.status(200).json({ message: "Ami supprimé !" }))
+            .catch((error) => res.status(500).json({ error }));
+        } else {
+          res.status(401).json({
+            message:
+              "Vous n'êtes pas amis avec cet utilisateur ou une erreur de token est survenue!",
+          });
+        }
+      }
+      )
       .catch((error) => res.status(500).json({ error }));
   }
 };

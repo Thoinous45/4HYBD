@@ -1,15 +1,15 @@
 const mongoose = require("mongoose");
 const uniqueValidator = require("mongoose-unique-validator");
 const { story } = require("../controllers/user");
-var Schema = mongoose.Schema
+let Schema = mongoose.Schema
 
 const locationSchema = mongoose.Schema(
   {
     longitude: { type: Number, required: false },
     latitude: { type: Number, required: false },
+    _id : false,
   },
   {timestamps: false},
-  {id : false},
   {require: false}
 );
 
@@ -21,10 +21,10 @@ const storySchema = mongoose.Schema(
     size: { type: Number, required: true },
     type: { type: String, required: true },
     location : locationSchema,
+    _id : false,
   },
   {timestamps: true},
   {require: false},
-  {_id: false}
 );
 
 

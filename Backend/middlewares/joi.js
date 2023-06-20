@@ -26,7 +26,7 @@ const shemaRegister = Joi.object().keys({
 
 const shemaLogin = Joi.object().keys({
   email: Joi.string().email().required(),
-  password: passwordComplexity(complexityOptions)
+  password: Joi.string().required(),
 })
 
 
