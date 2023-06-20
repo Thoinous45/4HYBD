@@ -148,14 +148,25 @@ exports.getAllUser = (req, res, next) => {
     .catch((err) => res.status(401).json({ err }));
 };
 
-exports.getStrangerOnly = async (req, res, next) => {
+exports.getStrangerOnly = (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
   const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
   const userId = decodedToken.userId;
   let contact = [];
 
-  await Friends.find({ $or: [{ recipient: userId }, { requester: userId }] })
+  Friends.find({ $or: [{ recipient: userId }, { requester: userId }] })
     .then((friends) => {
+
+      if (friends.length === 0)
+      {
+        User.find()
+          .select("-password -createdAt -updatedAt -__v -story")
+          .then((user) => {
+            res.status(200).json(user);
+          })
+          .catch((err) => res.status(401).json({ err }));
+
+      }else{
       contact.push(userId);
       for (let friend of friends) {
         if (friend.recipient == userId) {
@@ -171,6 +182,7 @@ exports.getStrangerOnly = async (req, res, next) => {
           })
           .catch((err) => res.status(401).json({ err }));
       }
+    }
     })
     .catch((err) => res.status(401).json({ err }));
 };
