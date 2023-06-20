@@ -6,22 +6,18 @@ import {
     IonFooter,
     IonHeader, IonIcon,
     IonInput,
-    IonItem, IonPage,
+    IonItem, IonLabel, IonNote, IonPage, IonText,
     IonTitle,
     IonToolbar
 } from "@ionic/react";
 import {chevronBack, send} from "ionicons/icons";
+import BoxMessage from "../components/BoxMessage";
 
 
 const Messages = () => {
 
-    //const [messages, setMessages] = useState(ChatService.getChat(data.id));
     const [message, setMessage] = useState("");
-    const test = 1
-
-    useEffect(() => {
-        console.log(message)
-    }, [message])
+    
 
     return (
         <IonPage>
@@ -36,7 +32,7 @@ const Messages = () => {
                 </IonToolbar>
             </IonHeader>
             <IonContent>
-                Salut
+                <BoxMessage message={"test"} sender={""}/>
             </IonContent>
             <IonFooter>
                 <IonToolbar>

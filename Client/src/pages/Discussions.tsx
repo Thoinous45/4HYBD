@@ -1,9 +1,27 @@
-import {IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar} from '@ionic/react';
-import React from "react";
+import {
+    IonAvatar,
+    IonButton,
+    IonButtons,
+    IonContent,
+    IonHeader,
+    IonIcon, IonImg, IonItem, IonLabel,
+    IonList, IonModal,
+    IonPage,
+    IonTitle,
+    IonToolbar
+} from '@ionic/react';
+import React, {useEffect, useState} from "react";
 import {createOutline} from "ionicons/icons";
 import Groupes from "../components/Groupes";
+import ModalNewGroup from "../components/ModalNewGroup";
 
 const Discussions: React.FC = () => {
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const closeModal = () => {
+        setIsModalOpen(false);
+    }
+
     return (
             <IonPage>
             <IonHeader>
@@ -14,7 +32,7 @@ const Discussions: React.FC = () => {
                         </IonButton>
                     </IonButtons>
                     <IonButtons slot="end">
-                        <IonButton>
+                        <IonButton onClick={() => setIsModalOpen(true)}>
                             <IonIcon slot="end" icon={createOutline}></IonIcon>
                         </IonButton>
                     </IonButtons>
@@ -27,6 +45,9 @@ const Discussions: React.FC = () => {
                     </IonToolbar>
                 </IonHeader>
                 <Groupes/>
+
+                <ModalNewGroup isOpen={isModalOpen} closeModal={closeModal} />
+
             </IonContent>
         </IonPage>
     );

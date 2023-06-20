@@ -24,9 +24,9 @@ import React from "react";
 import Login from "./pages/Login";
 import Tabs from "./pages/Tabs";
 import PrivateRoute from "./utils/PrivateRoute";
-import Informations from "./pages/Informations";
 import Messages from "./pages/Messages";
-
+import Register from "./pages/Register";
+import IsAuthRoute from "./utils/IsAuthRoute";
 
 setupIonicReact();
 
@@ -34,7 +34,8 @@ const App: React.FC = () => (
     <IonApp>
         <IonReactRouter>
             <IonRouterOutlet>
-                <Route exact path="/" component={Login}/>
+                <IsAuthRoute exact path="/" component={Login}/>
+                <IsAuthRoute exact path="/register" component={Register}/>
                 <PrivateRoute exact path="/messages/:id" component={Messages}/>
                 <PrivateRoute path="/app" component={Tabs}/>
             </IonRouterOutlet>

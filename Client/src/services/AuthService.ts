@@ -1,49 +1,74 @@
 import axios from 'axios';
 
+const api = "http://localhost:3000/api/users/"
+
 const AuthService = {
     login: async (email: string, password: string) => {
         try {
-            const response = await axios.post('/api/auth/login', {
+            await axios.post(api + 'login', {
                 email,
                 password,
-            });
-            const {token} = response.data;
-            localStorage.setItem('token', token);
-            return token;
+            }).then((response) => {
+                sessionStorage.setItem('user', response.data.userId);
+                sessionStorage.setItem('token', response.data.token);
+            })
         } catch (error) {
-            throw error;
+            // @ts-ignore
+            switch (error.response.status) {
+                case 401:
+                    return {status: "error", error: "Email ou mot de passe incorrect"};
+                case 500:
+                    return {status: "error", error: "Utilisateur non trouvé"};
+                default:
+                    return {status: "error", error: "Une erreur est survenue"};
+            }
         }
+        return {status: "success"};
     },
 
-    register: async (email: string, password: string) => {
+    register: async (email: string, password: string, password_confirmation: string, firstname: string, lastname: string) => {
         try {
-            const response = await axios.post('/api/auth/register', {
+            await axios.post(api + 'signup', {
                 email,
                 password,
-            });
-            return response.data;
+                password_confirmation,
+                firstname,
+                lastname,
+            })
         } catch (error) {
-            throw error;
+            // @ts-ignore
+            switch (error.response.status) {
+                case 401:
+                    return {status: "error", error: "Email existant"};
+                case 406:
+                    // @ts-ignore
+                    return {status: "error", error: error.response.data.msg};
+                default:
+                    return {status: "error", error: "Une erreur est survenue"};
+
+            }
         }
+        return {status: "success"};
     },
 
     logout: async () => {
         try {
-            localStorage.removeItem('token');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('user');
         } catch (error) {
             throw error;
         }
     },
 
     isAuthenticated: () => {
-        try {
-            const token = localStorage.getItem('token');
-            /*return token !== null;*/
-            return true;
-        } catch (error) {
-            throw error;
-        }
-    }
+        if (!sessionStorage.getItem('token')) return false;
+        const token = sessionStorage.getItem('token');
+        return axios.get(api + 'isLogin', {
+            headers: {'Authorization': `Bearer ${token}`}
+        }).then((response) => {
+            return response.data;
+        });
+    },
 }
 
 export default AuthService;

@@ -10,7 +10,7 @@ const auth=require("../middlewares/auth")
 
 router.post("/signup",joi.userRegister,regex.authValidation, userCtrl.createUser);
 //bouncer protect from brutforce
-router.post("/login",joi.userLogin, userCtrl.login)
+router.post("/login", userCtrl.login)
 router.get ("/islogin",userCtrl.isLogin)
 router.put("/modify",auth,userCtrl.modifyUser)
 router.get("/all",userCtrl.getAllUser)
