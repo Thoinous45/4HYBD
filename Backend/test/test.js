@@ -255,7 +255,6 @@ describe("Users", () => {
     describe("/PUT user", () => {
       it("it should not PUT a user with wrong token", (done) => {
         let moduser = {
-          pseudo: "test2",
           password: "password123!",
           password_confirmation: "password123!",
         };
@@ -282,7 +281,6 @@ describe("Users", () => {
   
     it("it should PUT a user", (done) => {
       let moduser = {
-        pseudo: "test2",
         password: "password123!",
         password_confirmation: "password123!",
       };
