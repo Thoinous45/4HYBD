@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const uniqueValidator = require("mongoose-unique-validator");
-var Schema = mongoose.Schema;
+let Schema = mongoose.Schema;
 
 const friendsSchema = mongoose.Schema(
   {

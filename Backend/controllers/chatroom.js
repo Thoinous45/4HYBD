@@ -65,6 +65,8 @@ exports.postMessage = async (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
   const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
   const userId = decodedToken.userId;
+  const firstname = decodedToken.firstname;
+  const lastname = decodedToken.lastname;
 
   if (decodedToken) {
     ChatRoom.findOne({ _id: req.body.roomId })
@@ -72,6 +74,8 @@ exports.postMessage = async (req, res, next) => {
         if (chatroom.userIds.includes(userId)) {
           const newMessage = {
             sender: userId,
+            firstname: firstname,
+            lastname: lastname,
             message: req.body.message,
           };
           chatroom.messages.push(newMessage);
@@ -155,6 +159,8 @@ exports.addUserToConversation = async (req, res, next) => {
             .then((user) => {
               const newMessage = {
                 sender: "Chatbot",
+                firstname: "Chat",
+                lastname: "Bot",
                 message: "L'utilisateur " + user.username + " a été ajouté",
               };
               chatroom.messages.push(newMessage);
@@ -169,7 +175,8 @@ exports.addUserToConversation = async (req, res, next) => {
                     .status(500)
                     .json("une erreur est survenue ou la demande n'existe pas")
                 );
-            });
+            }).catch((error) =>
+              res.status(500).json("une erreur est survenue ou la demande n'existe pas"));
         } else {
           res
             .status(500)
@@ -186,12 +193,89 @@ exports.addUserToConversation = async (req, res, next) => {
   }
 };
 
-/*
-export default {
+exports.removeUserFromConversation = async (req, res, next) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
+  const userId = decodedToken.userId;
+
+  if (decodedToken) {
+    ChatRoom.findOne({ _id: req.params.id })
+      .then((chatroom) => {
+        if (
+          chatroom.userIds.includes(userId) &&
+          chatroom.userIds.includes(req.body.userId) === true
+        ) {
+          User.findOne({ _id: req.body.userId })
+            .select("-password -__v -createdAt -updatedAt")
+            .then((user) => {
+              const newMessage = {
+                sender: "Chatbot",
+                firstname: "Chat",
+                lastname: "Bot",
+                message: "L'utilisateur " + user.username + " a été supprimé",
+              };
+              chatroom.messages.push(newMessage);
+              chatroom.userIds.splice(chatroom.userIds.indexOf(req.body.userId), 1);
+              chatroom
+                .save()
+                .then(() => {
+                  res.status(200).json("utilisateur supprimé");
+                })
+                .catch((error) =>
+                  res
+                    .status(500)
+                    .json("une erreur est survenue ou la demande n'existe pas")
+                );
+            }).catch((error) =>
+              res.status(500).json("une erreur est survenue ou la demande n'existe pas"));
+        } else {
+          res
+            .status(500)
+            .json(
+              "vous n'avez pas le droit de supprimer des personnes à cette conversation ou l'utilisateur n'est pas présent"
+            );
+        }
+      })
+      .catch((error) =>
+        res
+          .status(500)
+          .json("une erreur est survenue ou la demande n'existe pas")
+      );
+  }
+}
 
 
-  postMessage: async (req, res) => {},
-  getRecentConversation: async (req, res) => {},
-  getConversationByRoomId: async (req, res) => {},
-  markConversationReadByRoomId: async (req, res) => {},
-};*/
+exports.deleteConversation = async (req, res, next) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
+  const userId = decodedToken.userId;
+
+  if (decodedToken) {
+    ChatRoom.findOne({ _id: req.params.id })
+      .then((chatroom) => {
+        if (chatroom.userIds.includes(userId)) {
+          chatroom.delete()
+            .then(() => {
+              res.status(200).json("conversation supprimée");
+            })
+            .catch((error) =>
+              res
+                .status(500)
+                .json("une erreur est survenue ou la demande n'existe pas")
+            );
+        } else {
+          res
+            .status(500)
+            .json(
+              "vous n'avez pas le droit de supprimer cette conversation"
+            );
+        }
+      })
+      .catch((error) =>
+        res
+          .status(500)
+          .json("une erreur est survenue ou la demande n'existe pas")
+      );
+  }
+}
+

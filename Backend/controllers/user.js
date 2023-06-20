@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Friends = require("../models/Friends");
+const fs = require("fs");
 
 require("dotenv").config();
 
@@ -42,6 +43,8 @@ exports.login = (req, res, next) => {
             token: jwt.sign(
               {
                 userId: user._id,
+                firstname: user.firstname,
+                lastname: user.lastname,
               },
               process.env.TOKEN_KEY,
               {
@@ -71,14 +74,15 @@ exports.isLogin = (req, res, next) => {
   const userId = decodedToken.userId;
 
   if (decodedToken) {
-    User.find({ _id: userId }).then((user) => {
-      if (user === null) {
-        return res.status(401).json(false);
-      }
-      else{
-        res.status(200).json(true);
-      }
-    }).catch((error) => res.status(401).json({ error }));
+    User.find({ _id: userId })
+      .then((user) => {
+        if (user === null) {
+          return res.status(401).json(false);
+        } else {
+          res.status(200).json(true);
+        }
+      })
+      .catch((error) => res.status(401).json({ error }));
   } else {
     res.status(402).json(false);
   }
@@ -103,9 +107,7 @@ exports.modifyUser = (req, res, next) => {
 
           User.updateOne({ _id: userId }, user)
             .then(() =>
-              res
-                .status(201)
-                .json({ message: "Utilisateur modifié !", user, userId })
+              res.status(201).json({ message: "Utilisateur modifié !" })
             )
             .catch((err) => res.status(401).json({ err }));
         } else {
@@ -146,13 +148,13 @@ exports.getAllUser = (req, res, next) => {
     .catch((err) => res.status(401).json({ err }));
 };
 
-exports.getStrangerOnly = (req, res, next) => {
+exports.getStrangerOnly = async (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
   const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
   const userId = decodedToken.userId;
   let contact = [];
 
-  Friends.find({ $or: [{ recipient: userId }, { requester: userId }] })
+  await Friends.find({ $or: [{ recipient: userId }, { requester: userId }] })
     .then((friends) => {
       contact.push(userId);
       for (let friend of friends) {
@@ -189,37 +191,50 @@ exports.postStory = (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
   const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
   const userId = decodedToken.userId;
+  if (req.file === undefined) {
+    return res.status(400).json({ message: "erreur fichier invalide" });
+  } else {
+    User.findOne({ _id: userId })
+      .select("-password -createdAt -updatedAt -__v")
+      .then((user) => {
+        const fileName = req.file.filename;
+        const fileSize = req.file.size;
+        const fileType = req.file.mimetype;
+        const description = req.body.description;
+        const longitude = req.body.longitude;
+        const latitude = req.body.latitude;
 
-  const fileName = req.file.filename;
-  const fileSize = req.file.size;
-  const fileType = req.file.mimetype;
-  const description = req.body.description;
-  const longitude = req.body.longitude;
-  const latitude = req.body.latitude;
+        if (user.story !== undefined) {
+          const path = "uploads/" + user.story.name;
+          try {
+            fs.unlinkSync(path);
+            //file removed
+          } catch (err) {
+            console.error(err);
+          }
+        }
 
-  User.findOne({ _id: userId })
-    .select("-password -createdAt -updatedAt -__v")
-    .then((user) => {
-      const location = {
-        longitude: longitude,
-        latitude: latitude,
-      };
+        const location = {
+          longitude: longitude,
+          latitude: latitude,
+        };
 
-      const file = {
-        name: fileName,
-        description: description,
-        size: fileSize,
-        type: fileType,
-        location: location,
-      };
+        const file = {
+          name: fileName,
+          description: description,
+          size: fileSize,
+          type: fileType,
+          location: location,
+        };
 
-      user.story = file;
-      user
-        .save()
-        .then(() => res.status(201).json(req.file))
-        .catch((error) => res.status(400).json({ error }));
-    })
-    .catch((err) => res.status(401).json({ err }));
+        user.story = file;
+        user
+          .save()
+          .then(() => res.status(201).json(req.file))
+          .catch((error) => res.status(400).json({ error }));
+      })
+      .catch((err) => res.status(401).json({ err }));
+  }
 };
 
 exports.getStory = (req, res, next) => {
@@ -232,7 +247,6 @@ exports.getStory = (req, res, next) => {
       .then((friends) => {
         if (friends) {
           let friendsId = [];
-
           if (friends.recipient == userId) {
             friendsId.push(friends.requester);
           } else if (friends.requester == userId) {
@@ -255,12 +269,68 @@ exports.getStory = (req, res, next) => {
   }
 };
 
-exports.myStory = (req, res, next) => {
+exports.getStoryImage = (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
   const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
   const userId = decodedToken.userId;
 
   if (decodedToken) {
+    Friends.findOne({ $or: [{ recipient: userId , requester :req.body.friendId }, { requester: userId , receiver : req.body.friendId }] })
+      .then((friends) => {
+        if (friends!==null) {
+          let friendsId = [];  
+          if (friends.recipient == userId) {
+            friendsId.push(friends.requester);
+          } else if (friends.requester == userId) {
+            friendsId.push(friends.recipient);
+          }
+
+          User.find({ _id: { $in: friendsId } })
+            .select("-password -createdAt -updatedAt -__v")
+            .then((users) => {
+              let fileId = "uploads/" + users.story.name;
+              return res.download(fileId, users.story);
+            })
+            .catch((err) => res.status(401).json({ err }));
+        }
+      })
+      .catch((err) => res.status(401).json({ err }));
+  }
+
+
+
+}
+
+exports.myStoryImage = (req, res, next) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
+  const userId = decodedToken.userId;
+
+  if (decodedToken) {
+    User.findOne({ _id: userId })
+      .select("-password -createdAt -updatedAt -__v")
+      .then((user) => {
+        let fileId = "uploads/" + user.story.name;
+        return res.download(fileId, user.story);
+      })
+      .catch((err) => res.status(401).json({ err }));
+  } else {
+    res.status(402).json({ message: "erreur token invalide" });
+  }
+};
+
+exports.myStoryInfo = (req, res, next) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
+  const userId = decodedToken.userId;
+
+  if (decodedToken) {
+    User.findOne({ _id: userId })
+      .select("-password -createdAt -updatedAt -__v")
+      .then((user) => {
+        res.status(200).json(user.story);
+      })
+      .catch((err) => res.status(401).json({ err }));
   } else {
     res.status(402).json({ message: "erreur token invalide" });
   }
