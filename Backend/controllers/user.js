@@ -148,41 +148,38 @@ exports.getAllUser = (req, res, next) => {
     .catch((err) => res.status(401).json({ err }));
 };
 
-exports.getStrangerOnly = (req, res, next) => {
+exports.getStrangerOnly = async (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
   const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
   const userId = decodedToken.userId;
   let contact = [];
 
-  Friends.find({ $or: [{ recipient: userId }, { requester: userId }] })
+  await Friends.find({ $or: [{ recipient: userId }, { requester: userId }] })
     .then((friends) => {
-
-      if (friends.length === 0)
-      {
-        User.find()
+      if (friends.length === 0) {
+        User.find({ _id: { $nin: userId } })
           .select("-password -createdAt -updatedAt -__v -story")
           .then((user) => {
             res.status(200).json(user);
           })
           .catch((err) => res.status(401).json({ err }));
-
-      }else{
-      contact.push(userId);
-      for (let friend of friends) {
-        if (friend.recipient == userId) {
-          contact.push(friend.requester);
-        } else if (friend.requester == userId) {
-          contact.push(friend.recipient);
+      } else {
+        contact.push(userId);
+        for (let friend of friends) {
+          if (friend.recipient == userId) {
+            contact.push(friend.requester);
+          } else if (friend.requester == userId) {
+            contact.push(friend.recipient);
+          }
         }
-
         User.find({ _id: { $nin: contact } })
           .select("-password -createdAt -updatedAt -__v -story")
           .then((user) => {
+            console.log(user);
             res.status(200).json(user);
           })
           .catch((err) => res.status(401).json({ err }));
       }
-    }
     })
     .catch((err) => res.status(401).json({ err }));
 };
@@ -287,10 +284,15 @@ exports.getStoryImage = (req, res, next) => {
   const userId = decodedToken.userId;
 
   if (decodedToken) {
-    Friends.findOne({ $or: [{ recipient: userId , requester :req.body.friendId }, { requester: userId , receiver : req.body.friendId }] })
+    Friends.findOne({
+      $or: [
+        { recipient: userId, requester: req.body.friendId },
+        { requester: userId, receiver: req.body.friendId },
+      ],
+    })
       .then((friends) => {
-        if (friends!==null) {
-          let friendsId = [];  
+        if (friends !== null) {
+          let friendsId = [];
           if (friends.recipient == userId) {
             friendsId.push(friends.requester);
           } else if (friends.requester == userId) {
@@ -308,10 +310,7 @@ exports.getStoryImage = (req, res, next) => {
       })
       .catch((err) => res.status(401).json({ err }));
   }
-
-
-
-}
+};
 
 exports.myStoryImage = (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
