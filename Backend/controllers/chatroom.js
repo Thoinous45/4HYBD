@@ -55,6 +55,12 @@ exports.myConversations = async (req, res, next) => {
     ChatRoom.find({ userIds: userId })
       .select("-userIds -initiator -__v -createdAt -updatedAt")
       .then((chatrooms) => {
+
+        //res le tableau de chatrooms avec seulement le dernier messages de chaque conversation
+        chatrooms.forEach((chatroom) => {
+          chatroom.messages = chatroom.messages[chatroom.messages.length - 1];
+        });
+
         res.status(200).json(chatrooms);
       })
       .catch((error) =>
