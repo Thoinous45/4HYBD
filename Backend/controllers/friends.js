@@ -44,7 +44,6 @@ exports.addFriend = async (req, res, next) => {
 };
                 
 
-               
 
 exports.acceptFriend = (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
