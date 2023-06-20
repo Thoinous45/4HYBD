@@ -1,6 +1,5 @@
 process.env.NODE_ENV = "test";
 let mongoose = require("mongoose");
-let User = require("../models/User");
 
 //Require the dev-dependencies
 let chai = require("chai");
@@ -10,7 +9,6 @@ const { beforeEach } = require("mocha");
 chai.should();
 chai.use(chaiHttp);
 
-let token = "";
 
 describe("Users", () => {
   describe("/POST register", () => {
