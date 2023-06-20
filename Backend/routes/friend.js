@@ -19,6 +19,7 @@ router.put("/accept",friendCtrl.acceptFriend);
 router.get ("/",friendCtrl.getFriends);
 router.get ("/request",friendCtrl.getRequests);
 router.get ("/requestsend",friendCtrl.getSendRequests);
+router.delete ("/delete",friendCtrl.deleteFriend);
 
 module.exports = router;
 

@@ -2,15 +2,17 @@ const express = require("express");
 const router = express.Router();
 const chatRoom = require('../controllers/chatroom');
 
+const auth = require('../middlewares/auth');
 
 router
-  .get('/', chatRoom.myConversations)
-  .get('/:id', chatRoom.getMessages)
-  .post('/create', chatRoom.initiate)
-  .post('/sendMessage', chatRoom.postMessage)
-  .post('/addUser/:id', chatRoom.addUserToConversation)
-  .delete('/removeUser/:id', chatRoom.removeUserFromConversation)
-  .delete('/:id', chatRoom.deleteConversation)
+  .get('/', auth,chatRoom.myConversations)
+  .get('/:id', auth,chatRoom.getMessages)
+  .post('/create',auth, chatRoom.initiate)
+  .post('/sendMessage', auth,chatRoom.postMessage)
+  .post('/addUser/', auth,chatRoom.addUserToConversation)
+  .put ('/updateName', auth,chatRoom.changeConversationName)
+  .delete('/removeUser/', auth,chatRoom.removeUserFromConversation)
+  .delete('/', auth,chatRoom.deleteConversation)
   
 
 module.exports = router;
