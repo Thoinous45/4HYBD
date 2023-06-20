@@ -252,20 +252,20 @@ exports.getStory = (req, res, next) => {
   const userId = decodedToken.userId;
 
   if (decodedToken) {
-    Friends.find({ $or: [{ recipient: userId }, { requester: userId }] })
+    Friends.find({ $or: [{ recipient: userId }, { requester: userId }] ,status:2})
       .then((friends) => {
         if (friends) {
           let friendsId = [];
-          if (friends.recipient == userId) {
-            friendsId.push(friends.requester);
-          } else if (friends.requester == userId) {
-            friendsId.push(friends.recipient);
-          }
+          friends.forEach(friend => {
+            if(friend.recipient == userId){
+              friendsId.push(friend.requester)
+            }else{
+              friendsId.push(friend.recipient)
+            }
+          });
 
-          console.log(friendsId);
-
-          User.find({ _id: { $in: friendsId } })
-            .select("-password -createdAt -updatedAt -__v")
+          User.find({ _id: { $in: friendsId } , story: { $exists: true , $ne :[]} })
+            .select("-password -createdAt -updatedAt -__v -email")
             .then((users) => {
               res.status(200).json(users);
             })
@@ -289,23 +289,24 @@ exports.getStoryImage = (req, res, next) => {
         { recipient: userId, requester: req.body.friendId },
         { requester: userId, receiver: req.body.friendId },
       ],
+      status: 2
     })
-      .then((friends) => {
-        if (friends !== null) {
-          let friendsId = [];
-          if (friends.recipient == userId) {
-            friendsId.push(friends.requester);
-          } else if (friends.requester == userId) {
-            friendsId.push(friends.recipient);
+      .then((friend) => {
+        if (friend !== null) {
+          if (friend.recipient == userId) {
+            var friendId = friend.requester;
+          } else {
+            var friendId = friend.recipient;
           }
-
-          User.find({ _id: { $in: friendsId } })
+          User.findOne({ _id: friendId  })
             .select("-password -createdAt -updatedAt -__v")
-            .then((users) => {
-              let fileId = "uploads/" + users.story.name;
-              return res.download(fileId, users.story);
+            .then((user) => {
+              let fileId = "uploads/" + user.story.name;
+              return res.download(fileId);
             })
             .catch((err) => res.status(401).json({ err }));
+        }else{
+          res.status(401).json({ message: "vous n'etes pas amis" });
         }
       })
       .catch((err) => res.status(401).json({ err }));

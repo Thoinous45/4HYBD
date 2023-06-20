@@ -313,7 +313,7 @@ exports.changeConversationName = async (req, res, next) => {
         if (
           chatroom.userIds.includes(userId) 
         ) {
-          chatroom.name = req.body.name;
+          chatroom.conversationName = req.body.name;
           chatroom
             .save()
             .then(() => {

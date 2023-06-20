@@ -21,6 +21,7 @@ router.delete("/delete",auth,userCtrl.deleteUser)
 //Story route
 router.post("/postStory",auth,multer,userCtrl.postStory)
 router.get ("/getStoryInfo",auth,userCtrl.getStory)
+router.get ("/getStoryImage",auth,userCtrl.getStoryImage)
 router.get ("/myStoryImage",auth,userCtrl.myStoryImage)
 router.get ("/myStoryInfo",auth,userCtrl.myStoryInfo)
 
