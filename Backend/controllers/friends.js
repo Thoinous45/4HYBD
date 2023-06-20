@@ -11,7 +11,7 @@ exports.addFriend = async (req, res, next) => {
   if (decodedToken || userId !== req.body.recipient) {
     await Friends.findOne({ $or: [{ requester: userId , recipient : req.body.userIds}, { requester: req.body.userIds , recipient:userId}] })
       .then((friend) => {
-        if (friend !== null) {
+        if (friend == null) {
               const friends = new Friends({
                 requester: userId,
                 recipient: req.body.recipient,
