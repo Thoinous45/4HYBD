@@ -22,56 +22,15 @@ import { Friend, FriendRequest } from "../models/Friend.model";
 import FriendItem from "../components/amis/FriendItem";
 import LoadingFriendItem from "../components/amis/LoadingFriendItem";
 import FriendsService from "../services/FriendsService";
-const mockedUsers: Array<Friend> = [
-  {
-    _id: "1",
-    firstname: "Jean",
-    lastname: "Dupont",
-    email: "jean-dupont@gmail.com",
-  },
-  {
-    _id: "2",
-    firstname: "Jeanne",
-    lastname: "Dupont",
-    email: "jeanne-dupont@gmail.com",
-  },
-];
-
-const mockedUsersFriendRequest: Array<Friend> = [
-  {
-    _id: "3",
-    firstname: "Julien",
-    lastname: "Vartan",
-    email: "julien-vartan@mail.com",
-  },
-  {
-    _id: "4",
-    firstname: "Julie",
-    lastname: "Vartan",
-    email: "jujuvartan@hotmail.com",
-  },
-];
-
-const getUsers = (): Promise<Array<Friend>> => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve(mockedUsers);
-    }, 1000);
-  });
-};
-
-const getFriendsRequest = (): Promise<Array<Friend>> => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve(mockedUsersFriendRequest);
-    }, 1000);
-  });
-};
 
 const Amis: React.FC = () => {
   const [friendsToAdd, setFriendsToAdd] = React.useState<Array<Friend>>([]);
-  const [friendsRequest, setFriendsRequest] = React.useState<Array<FriendRequest>>([]);
-  const [friendsRequestSent, setFriendsRequestSent] = React.useState<Array<FriendRequest>>([]);
+  const [friendsRequest, setFriendsRequest] = React.useState<
+    Array<FriendRequest>
+  >([]);
+  const [friendsRequestSent, setFriendsRequestSent] = React.useState<
+    Array<FriendRequest>
+  >([]);
   const [friends, setFriends] = React.useState<Array<Friend>>([]);
   const [activeTab, setActiveTab] = React.useState<string | undefined>(
     "friends"
@@ -80,12 +39,13 @@ const Amis: React.FC = () => {
 
   const fetchData = async () => {
     setIsLoading(true);
-    const [friendsToAdd, friendRequests, friendRequestsSent, usersToAdd] = await Promise.all([
-      FriendsService.getFriends(),
-      FriendsService.getFriendsRequestsReceived(),
-      FriendsService.getFriendsRequestsSent(),
-      FriendsService.getFriendsToAdd(),
-    ]);
+    const [friendsToAdd, friendRequests, friendRequestsSent, usersToAdd] =
+      await Promise.all([
+        FriendsService.getFriends(),
+        FriendsService.getFriendsRequestsReceived(),
+        FriendsService.getFriendsRequestsSent(),
+        FriendsService.getFriendsToAdd(),
+      ]);
     setFriends(friendsToAdd);
     setFriendsToAdd(usersToAdd);
     setFriendsRequest(friendRequests);
@@ -94,28 +54,31 @@ const Amis: React.FC = () => {
   };
 
   useIonViewDidEnter(() => {
+    console.log("useIonViewDidEnter");
     fetchData();
   });
 
   useIonViewDidLeave(() => {
     setFriendsToAdd([]);
     setFriendsRequest([]);
+    setFriendsRequestSent([]);
+    setFriends([]);
   });
 
   const handleSearchFriendsInput = (ev: any) => {
-    const searchValue = ev.target.value;
-    if (searchValue.length > 0) {
-      const filteredUsers = mockedUsers.filter((user) => {
-        return (
-          user.firstname.toLowerCase().includes(searchValue.toLowerCase()) ||
-          user.lastname.toLowerCase().includes(searchValue.toLowerCase()) ||
-          user.email.toLowerCase().includes(searchValue.toLowerCase())
-        );
-      });
-      setFriendsToAdd(filteredUsers);
-    } else {
-      setFriendsToAdd(mockedUsers);
-    }
+    // const searchValue = ev.target.value;
+    // if (searchValue.length > 0) {
+    //   const filteredUsers = mockedUsers.filter((user) => {
+    //     return (
+    //       user.firstname.toLowerCase().includes(searchValue.toLowerCase()) ||
+    //       user.lastname.toLowerCase().includes(searchValue.toLowerCase()) ||
+    //       user.email.toLowerCase().includes(searchValue.toLowerCase())
+    //     );
+    //   });
+    //   setFriendsToAdd(filteredUsers);
+    // } else {
+    //   setFriendsToAdd(mockedUsers);
+    // }
   };
 
   const handlePageRefresh = async (ev: any) => {
@@ -159,7 +122,14 @@ const Amis: React.FC = () => {
             </IonListHeader>
             {!isLoading ? (
               friends.map((friend) => (
-                <FriendItem key={friend.email} friend={friend} type="friend" />
+                <FriendItem
+                  key={friend.email}
+                  friend={friend}
+                  type="friend"
+                  onDecline={async () => {
+                    // await FriendsService.(friend._id);
+                  }}
+                />
               ))
             ) : (
               <LoadingFriendItem />
@@ -176,7 +146,11 @@ const Amis: React.FC = () => {
               </IonListHeader>
               {!isLoading ? (
                 friendsRequest.map((request) => (
-                  <FriendItem key={request.email} request={request} type="request" />
+                  <FriendItem
+                    key={request.email}
+                    request={request}
+                    type="request"
+                  />
                 ))
               ) : (
                 <LoadingFriendItem />

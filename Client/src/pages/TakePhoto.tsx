@@ -12,6 +12,8 @@ import {
   import { useState } from "react";
   import StoriesService from "../services/StoriesService";
   import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Geolocation } from "@capacitor/geolocation";
+
   
   const TakePhoto: React.FC = () => {
     const [photo, setPhoto] = useState<string>("");
@@ -29,17 +31,12 @@ import {
     const takePhoto = async () => {
       try {
         const photoResult = await Camera.getPhoto({
-          resultType: CameraResultType.Uri,
+          resultType: CameraResultType.Base64,
           source: CameraSource.Camera,
           quality: 90,
         });
     
-        const fileResponse = await Filesystem.readFile({
-          path: photoResult.path!,
-          directory: Directory.Data
-        });
-    
-        const uint8Array = base64ToUint8Array(fileResponse.data);
+        const uint8Array = base64ToUint8Array(photoResult.base64String!);
         const blob = new Blob([uint8Array], { type: 'image/jpeg' });
     
         setPhoto(URL.createObjectURL(blob));
@@ -48,21 +45,25 @@ import {
       }
     };
     
+    
   
     const updateStory = async () => {
       try {
-        await StoriesService.postStory(
-          photo,
-          "Test story",
-          0,
-          0,
-        );
+        const coordinates = await Geolocation.getCurrentPosition();
+    
+        // Convert the photo URL back to a Blob
+        const response = await fetch(photo);
+        const blob = await response.blob();
+    
+        await StoriesService.postStory(blob, "Description", coordinates.coords.latitude, coordinates.coords.longitude);
         setPhoto("");
         // Navigate back to the previous screen or show a success message
       } catch (error) {
         console.error("Error updating story:", error);
       }
     };
+    
+    
   
     return (
       <IonPage>

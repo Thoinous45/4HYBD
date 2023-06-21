@@ -14,5 +14,5 @@ export interface UserStory {
         createdAt: Date;
         updatedAt: Date;
     };
-    imageUrl?: string;
+    image?: Blob;
 }

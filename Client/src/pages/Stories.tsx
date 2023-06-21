@@ -16,14 +16,15 @@ import {
   useIonViewDidLeave,
 } from "@ionic/react";
 import { add } from "ionicons/icons";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import StoryDetailsModal from "../components/stories/StoryDetailsModal";
 import StoriesService from "../services/StoriesService";
 import { UserStory } from "../models/Story.model";
+import { useHistory } from "react-router";
 
 const Stories: React.FC = () => {
   const key = "AIzaSyC1YaQQECG6ZYTX2rxsKYHv7682Q4isIDw";
-  let newMap: GoogleMap;
+  const newMap = useRef<GoogleMap | null>(null);
   const mapRef = useRef(null);
 
   const [selectedStory, setSelectedStory] = useState<UserStory>();
@@ -40,6 +41,18 @@ const Stories: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    if (stories.length > 0) {
+      createMap();
+    }
+  }, [stories]);
+
+  const history = useHistory();
+
+  const openTakePhoto = () => {
+    history.push("/take-photo");
+  };
+
   const onMarkerClick = async (marker: MarkerClickCallbackData) => {
     const story = stories.find(
       (story) =>
@@ -49,7 +62,7 @@ const Stories: React.FC = () => {
     if (story) {
       try {
         const storyImage = await StoriesService.getStoryPhoto(story._id);
-        setSelectedStory({ ...story, imageUrl: storyImage });
+        setSelectedStory({ ...story, image: storyImage });
         setShowModal(true);
       } catch (error) {
         console.error("Failed to fetch story image:", error);
@@ -62,26 +75,28 @@ const Stories: React.FC = () => {
   };
 
   const addMarker = async (story: UserStory) => {
-    await newMap.addMarker({
+    await newMap.current?.addMarker({
       coordinate: {
         lat: story.story.location.latitude,
-        lng: story.story.location.longitude
+        lng: story.story.location.longitude,
       },
       title: story.story.description,
     });
   };
 
   const addMarkers = async () => {
-    stories.forEach((story) => {
-      addMarker(story);
-    });
+    await Promise.all(
+      stories.map((story) => {
+        return addMarker(story);
+      })
+    );
   };
 
   const createMap = async () => {
     if (!mapRef.current) return;
     const coordinates = await Geolocation.getCurrentPosition();
-
-    newMap = await GoogleMap.create({
+  
+    newMap.current = await GoogleMap.create({
       id: "google-map",
       element: mapRef.current,
       apiKey: key,
@@ -94,19 +109,18 @@ const Stories: React.FC = () => {
         disableDefaultUI: true,
       },
     });
-
-    newMap.setOnMarkerClickListener((marker) => onMarkerClick(marker));
+  
+    newMap.current.setOnMarkerClickListener((marker) => onMarkerClick(marker));
 
     await addMarkers();
   };
+  
 
-  useIonViewDidEnter(() => {
-    fetchStories();
-    createMap();
+  useIonViewDidEnter(async () => {
+    await fetchStories();
   });
 
   return (
-    console.log("Stories.tsx"),
     (
       <IonPage>
         <IonHeader mode="md">
@@ -120,7 +134,12 @@ const Stories: React.FC = () => {
             style={{ display: "inline-block", width: "100%", height: "100%" }}
           ></capacitor-google-map>
 
-          <IonFab vertical="bottom" horizontal="end" slot="fixed">
+          <IonFab
+            vertical="bottom"
+            horizontal="end"
+            slot="fixed"
+            onClick={openTakePhoto}
+          >
             <IonFabButton>
               <IonIcon icon={add} />
             </IonFabButton>

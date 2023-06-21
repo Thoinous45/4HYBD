@@ -27,6 +27,7 @@ import PrivateRoute from "./utils/PrivateRoute";
 import Messages from "./pages/Messages";
 import Register from "./pages/Register";
 import IsAuthRoute from "./utils/IsAuthRoute";
+import TakePhoto from './pages/TakePhoto';
 
 setupIonicReact();
 
@@ -38,6 +39,7 @@ const App: React.FC = () => (
                 <IsAuthRoute exact path="/register" component={Register}/>
                 <PrivateRoute exact path="/messages/:id" component={Messages}/>
                 <PrivateRoute path="/app" component={Tabs}/>
+                <PrivateRoute path="/take-photo" component={TakePhoto} exact />
             </IonRouterOutlet>
         </IonReactRouter>
     </IonApp>

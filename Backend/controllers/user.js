@@ -285,8 +285,8 @@ exports.getStoryImage = (req, res, next) => {
   if (decodedToken) {
     Friends.findOne({
       $or: [
-        { recipient: userId, requester: req.body.friendId },
-        { requester: userId, receiver: req.body.friendId },
+        { recipient: userId, requester: req.params.id },
+        { requester: userId, receiver: req.params.id },
       ],
       status: 2
     })

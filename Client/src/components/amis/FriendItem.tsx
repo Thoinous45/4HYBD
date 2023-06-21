@@ -1,5 +1,5 @@
 import { IonButton, IonIcon, IonItem, IonLabel } from "@ionic/react";
-import { checkmarkSharp, closeSharp, sendSharp } from "ionicons/icons";
+import { checkmarkSharp, closeSharp, sendSharp, trashBinSharp } from "ionicons/icons";
 import { Friend, FriendRequest } from "../../models/Friend.model";
 import FriendsService from "../../services/FriendsService";
 
@@ -7,6 +7,10 @@ interface AmiItemProps {
   friend?: Friend;
   request?: FriendRequest;
   type: "request" | "user" | "sent" | "friend";
+  onDelete?: () => void;
+  onAccept?: () => void;
+  onDecline?: () => void;
+  onSend?: () => void;
 }
 
 const handleSendFriendRequest =
@@ -22,7 +26,7 @@ const handleAcceptFriendRequest =
     console.log(request);
     FriendsService.acceptFriendRequest(request.requestId);
   };
-const FriendItem: React.FC<AmiItemProps> = ({ friend, request, type }) => {
+const FriendItem: React.FC<AmiItemProps> = ({ friend, request, type, onAccept, onDecline }) => {
   const name = request
     ? request.firstname + " " + request.lastname
     : friend!.firstname + " " + friend!.lastname;
@@ -36,13 +40,13 @@ const FriendItem: React.FC<AmiItemProps> = ({ friend, request, type }) => {
       </IonLabel>
       {type === "request" && (
         <>
-          <IonButton fill="solid" color="danger" style={{ marginRight: 16 }}>
+          <IonButton fill="solid" color="danger" style={{ marginRight: 16 }} onClick={onAccept}>
             <IonIcon icon={closeSharp} />
           </IonButton>
           <IonButton
             fill="solid"
             color="success"
-            onClick={handleAcceptFriendRequest(request!)}
+            onClick={onAccept}
           >
             <IonIcon icon={checkmarkSharp} color="dark" />
           </IonButton>
@@ -52,19 +56,19 @@ const FriendItem: React.FC<AmiItemProps> = ({ friend, request, type }) => {
         <IonButton
           slot="end"
           color="secondary"
-          onClick={handleSendFriendRequest(friend!)}
+          onClick={onAccept}
         >
           <IonIcon icon={sendSharp} />
         </IonButton>
       )}
       {type === "sent" && (
-        <IonButton slot="end" color="danger">
+        <IonButton slot="end" color="danger" onClick={onDecline}>
           <IonIcon icon={closeSharp} />
         </IonButton>
       )}
       {type === "friend" && (
-        <IonButton slot="end" color="danger">
-          <IonIcon icon={closeSharp} />
+        <IonButton slot="end" color="danger" onClick={onDecline}>
+          <IonIcon icon={trashBinSharp} />
         </IonButton>
       )}
     </IonItem>
