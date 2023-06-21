@@ -150,6 +150,9 @@ const Amis: React.FC = () => {
                     key={request.email}
                     request={request}
                     type="request"
+                    onAccept={async () => {
+                      await FriendsService.acceptFriendRequest(request.requestId);
+                    }}
                   />
                 ))
               ) : (
@@ -169,7 +172,11 @@ const Amis: React.FC = () => {
               ></IonSearchbar>
               {!isLoading ? (
                 friendsToAdd.map((friend) => (
-                  <FriendItem key={friend.email} friend={friend} type="user" />
+                  <FriendItem key={friend.email} friend={friend} type="user" onAccept={
+                    async () => {
+                      await FriendsService.sendFriendRequest(friend._id);
+                    }
+                  }/>
                 ))
               ) : (
                 <LoadingFriendItem />
